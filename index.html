@@ -24,19 +24,41 @@
             background-color: #f4f7f9;
         }
 
-        /* Custom style for the active sidebar link */
+        /* Custom style for the active navigation link */
         .nav-link.active {
-            @apply bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 font-semibold;
+            /* Desktop Styles */
+            @apply md:bg-indigo-50 md:text-indigo-700 md:border-l-4 md:border-indigo-600 md:font-semibold;
+            /* Mobile Styles */
+            @apply text-indigo-700 font-bold bg-indigo-100;
         }
 
         /* Style for the history table to be responsive */
-        #ledgerTableContainer {
+        #ledgerTableContainer,
+        #recentHistoryTableContainer {
             overflow-x: auto;
         }
 
         /* Hide content sections by default */
         .content-section {
             display: none;
+        }
+
+        /* Ensure main content is scrollable and pushes footer content down */
+        .main-content-area {
+            /* On mobile, add padding equivalent to the height of the bottom nav (approx 16-20 Tailwind units) */
+            padding-bottom: 5rem;
+            /* ~p-20 */
+        }
+
+        /* Ensure the mobile nav is truly sticky */
+        .mobile-sticky-nav {
+            position: sticky;
+            bottom: 0;
+        }
+
+        /* Hide the long link text on mobile */
+        .nav-text {
+            @apply hidden md:inline;
         }
     </style>
     <!-- FIX: Explicitly load Ethers v6, which supports BrowserProvider and BigInt -->
@@ -50,11 +72,12 @@
         class="fixed top-4 right-4 p-3 rounded-lg shadow-xl hidden transition duration-300 z-50 min-w-[250px] text-sm border"
         role="alert"></div>
 
-    <header class="flex justify-between items-center bg-white p-4 md:px-8 rounded-b-xl shadow-md">
-        <h1 class="text-2xl font-bold text-gray-800">DLPT Officer Portal</h1>
-        <div class="flex items-center space-x-4">
-            <div id="profile" class="hidden items-center bg-indigo-50 p-2 rounded-full shadow-inner">
-                <span id="officerRole" class="hidden text-sm font-medium text-indigo-700 mr-3">Traffic Officer</span>
+    <header class="flex justify-between items-center bg-white p-4 md:px-8 rounded-b-xl shadow-md flex-shrink-0 z-20">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800">DLPT Officer Portal</h1>
+        <div class="flex items-center space-x-2 md:space-x-4">
+            <div id="profile" class="hidden items-center bg-indigo-50 p-1 md:p-2 rounded-full shadow-inner">
+                <span id="officerRole"
+                    class="hidden md:inline text-xs md:text-sm font-medium text-indigo-700 mr-3">Traffic Officer</span>
                 <span id="walletShort"
                     class="text-indigo-900 font-mono text-xs bg-indigo-200 py-1 px-3 rounded-full"></span>
                 <button id="disconnectWalletBtn"
@@ -68,127 +91,162 @@
                 </button>
             </div>
             <button id="connectWalletBtn"
-                class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-indigo-700 transition duration-200">
+                class="bg-indigo-600 text-white font-semibold text-sm md:text-base py-2 px-3 md:px-4 rounded-full shadow-lg hover:bg-indigo-700 transition duration-200">
                 Connect Wallet
             </button>
         </div>
     </header>
 
     <!-- Main Content Area: Sidebar + Body -->
-    <div class="flex flex-1">
-        
-        <!-- Sidebar Navigation -->
-        <nav class="w-16 md:w-64 bg-white shadow-xl flex-shrink-0 pt-4 border-r">
-            <ul class="space-y-2 p-2">
+    <div class="flex flex-1 flex-col md:flex-row">
+
+        <!-- Sidebar Navigation (Responsive: Bottom bar on mobile, Sidebar on desktop) -->
+        <!-- Key responsive classes: order-last (to put it at the bottom of the column), sticky bottom-0 (to make it sticky), w-full, flex-row (on mobile) -->
+        <nav class="w-full md:w-64 bg-white shadow-xl flex-shrink-0 border-t md:border-r md:border-t-0 
+                    order-last md:order-none mobile-sticky-nav z-10">
+            <!-- Navigation links wrapper: flex for horizontal layout on mobile, block for vertical on desktop -->
+            <ul class="flex justify-around md:block space-y-0 md:space-y-2 p-1 md:p-2">
                 <li>
-                    <a href="#" data-view="home"
-                        class="nav-link active flex items-center p-3 text-sm text-gray-700 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600">
+                    <a href="#" data-view="home" class="nav-link active flex flex-col md:flex-row items-center justify-center md:justify-start 
+                                p-2 md:p-3 text-xs md:text-sm text-gray-700 rounded-lg transition 
+                                hover:bg-indigo-50 hover:text-indigo-600 w-full">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:mr-3" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
-                        <span class="hidden md:inline">Home</span>
+                        <span class="text-[10px] md:text-sm mt-1 md:mt-0 nav-text">Home</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" data-view="officer"
-                        class="nav-link flex items-center p-3 text-sm text-gray-700 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600">
+                    <a href="#" data-view="officer" class="nav-link flex flex-col md:flex-row items-center justify-center md:justify-start 
+                                p-2 md:p-3 text-xs md:text-sm text-gray-700 rounded-lg transition 
+                                hover:bg-indigo-50 hover:text-indigo-600 w-full">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:mr-3" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        <span class="hidden md:inline">Officer (Ticket Issuer)</span>
+                        <span class="text-[10px] md:text-sm mt-1 md:mt-0 nav-text">Officer</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" data-view="ledger"
-                        class="nav-link flex items-center p-3 text-sm text-gray-700 rounded-lg transition hover:bg-indigo-50 hover:text-indigo-600">
+                    <a href="#" data-view="ledger" class="nav-link flex flex-col md:flex-row items-center justify-center md:justify-start 
+                                p-2 md:p-3 text-xs md:text-sm text-gray-700 rounded-lg transition 
+                                hover:bg-indigo-50 hover:text-indigo-600 w-full">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:mr-3" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <span class="hidden md:inline">The Ledger</span>
+                        <span class="text-[10px] md:text-sm mt-1 md:mt-0 nav-text">The Ledger</span>
                     </a>
                 </li>
             </ul>
         </nav>
 
-        <!-- Dynamic Main Content -->
-        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+        <!-- Dynamic Main Content (Added pb-20 on mobile to clear the bottom nav) -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto main-content-area">
 
             <!-- 1. Home View -->
-            <section id="home-view" class="content-section grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-3 bg-white p-8 rounded-xl shadow-lg">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Welcome, Traffic Officer!</h2>
-                    <p class="text-gray-600 mb-6">This portal allows you to securely issue and track digital violations on the blockchain. Use the navigation panel on the left to get started.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-indigo-50 p-6 rounded-xl shadow-inner flex items-center space-x-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.007 12.007 0 002.944 12c.045 4.884 3.013 9.429 7.337 11.458.21.108.435.108.645 0 4.324-2.029 7.292-6.574 7.337-11.458A12.007 12.007 0 0012 2.944z" />
+            <!-- Changed lg:grid-cols-3 to just grid-cols-1 on mobile for stacking -->
+            <section id="home-view" class="content-section grid grid-cols-1 gap-8">
+                <div class="lg:col-span-3 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Welcome, Traffic Officer!</h2>
+                    <p class="text-gray-600 mb-6 text-sm md:text-base">This portal allows you to securely issue and
+                        track digital violations on the blockchain. Use the navigation panel to get started.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                        <div class="bg-indigo-50 p-4 md:p-6 rounded-xl shadow-inner flex items-center space-x-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-8 md:w-8 text-indigo-600"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.007 12.007 0 002.944 12c.045 4.884 3.013 9.429 7.337 11.458.21.108.435.108.645 0 4.324-2.029 7.292-6.574 7.337-11.458A12.007 12.007 0 0012 2.944z" />
                             </svg>
                             <div>
-                                <p class="text-2xl font-bold text-indigo-700" id="totalViolationsCount">--</p>
-                                <p class="text-sm text-indigo-500">Total Violations Issued</p>
+                                <p class="text-xl md:text-2xl font-bold text-indigo-700" id="totalViolationsCount">--
+                                </p>
+                                <p class="text-xs md:text-sm text-indigo-500">Total Violations Issued</p>
                             </div>
                         </div>
-                        <div class="bg-red-50 p-6 rounded-xl shadow-inner flex items-center space-x-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2v2m0 0V5m0 5a10.025 10.025 0 01-4.875 1.554C6.51 11.83 4.25 12 3 12c-1.25 0-3.51-.17-4.125-.446C-.025 11.05 0 10 0 10s.75-.5 1.5-.5c1.5 0 3.75.5 5.5.5s4 .5 5.5.5z" />
+                        <div class="bg-red-50 p-4 md:p-6 rounded-xl shadow-inner flex items-center space-x-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-8 md:w-8 text-red-600"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2v2m0 0V5m0 5a10.025 10.025 0 01-4.875 1.554C6.51 11.83 4.25 12 3 12c-1.25 0-3.51-.17-4.125-.446C-.025 11.05 0 10 0 10s.75-.5 1.5-.5c1.5 0 3.75.5 5.5.5s4 .5 5.5.5z" />
                             </svg>
                             <div>
-                                <p class="text-2xl font-bold text-red-700" id="unpaidFinesCount">--</p>
-                                <p class="text-sm text-red-500">Unpaid Fines</p>
+                                <p class="text-xl md:text-2xl font-bold text-red-700" id="unpaidFinesCount">--</p>
+                                <p class="text-xs md:text-sm text-red-500">Unpaid Fines</p>
                             </div>
                         </div>
-                        <div class="bg-green-50 p-6 rounded-xl shadow-inner flex items-center space-x-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2v2m0 0V5m0 5a10.025 10.025 0 014.875 1.554C17.49 11.83 19.75 12 21 12c1.25 0 3.51-.17 4.125-.446C24.025 11.05 24 10 24 10s-.75-.5-1.5-.5c-1.5 0-3.75.5-5.5.5s-4 .5-5.5.5z" />
+                        <div class="bg-green-50 p-4 md:p-6 rounded-xl shadow-inner flex items-center space-x-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-8 md:w-8 text-green-600"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2v2m0 0V5m0 5a10.025 10.025 0 014.875 1.554C17.49 11.83 19.75 12 21 12c1.25 0 3.51-.17 4.125-.446C24.025 11.05 24 10 24 10s-.75-.5-1.5-.5c-1.5 0-3.75.5-5.5.5s-4 .5-5.5.5z" />
                             </svg>
                             <div>
-                                <p class="text-2xl font-bold text-green-700" id="paidFinesCount">--</p>
-                                <p class="text-sm text-green-500">Paid Fines</p>
+                                <p class="text-xl md:text-2xl font-bold text-green-700" id="paidFinesCount">--</p>
+                                <p class="text-xs md:text-sm text-green-500">Paid Fines</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="mt-8 border-t pt-6">
-                           <h3 class="text-xl font-semibold text-gray-700 mb-3">Quick Actions</h3>
-                           <div class="flex flex-wrap gap-4">
-                               <button onclick="changeView('officer')" class="bg-indigo-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-indigo-600 transition duration-200 flex items-center space-x-2">
-                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                                   <span>Issue New Ticket</span>
-                               </button>
-                               <button onclick="changeView('ledger')" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 flex items-center space-x-2">
-                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-                                   <span>View Full Ledger</span>
-                               </button>
-                           </div>
+                        <h3 class="text-lg md:text-xl font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                        <div class="flex flex-wrap gap-3 md:gap-4">
+                            <button onclick="changeView('officer')"
+                                class="bg-indigo-500 text-white text-sm py-2 px-3 rounded-lg shadow-md hover:bg-indigo-600 transition duration-200 flex items-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span>Issue New Ticket</span>
+                            </button>
+                            <button onclick="changeView('ledger')"
+                                class="bg-gray-200 text-gray-800 text-sm py-2 px-3 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 flex items-center space-x-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                    <path fill-rule="evenodd"
+                                        d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span>View Full Ledger</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
-            
+
             <!-- 2. Officer (Ticket Issuer) View (Existing Form) -->
-            <section id="officer-view" class="content-section grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Violation Form (Left Column on Desktop) -->
-                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
-                    <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Issue New Violation</h2>
+            <!-- Changed lg:grid-cols-3 to md:grid-cols-3 for better tablet support -->
+            <section id="officer-view" class="content-section grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <!-- Violation Form (Left Column on Desktop, Top on Mobile) -->
+                <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
+                    <h2 class="text-xl md:text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Issue New Violation
+                    </h2>
                     <form id="violationForm" class="space-y-4">
                         <div>
-                            <label for="violatorAddress" class="block text-sm font-medium text-gray-700">Violator Wallet Address</label>
+                            <label for="violatorAddress" class="block text-sm font-medium text-gray-700">Violator Wallet
+                                Address</label>
                             <input type="text" id="violatorAddress" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="0x...">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
+                                placeholder="0x...">
                         </div>
                         <div>
-                            <label for="licenseNumber" class="block text-sm font-medium text-gray-700">License Plate Number</label>
+                            <label for="licenseNumber" class="block text-sm font-medium text-gray-700">License Plate
+                                Number</label>
                             <input type="text" id="licenseNumber" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="ABC-123">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
+                                placeholder="ABC-123">
                         </div>
                         <div>
-                            <label for="violationType" class="block text-sm font-medium text-gray-700">Violation Type</label>
+                            <label for="violationType" class="block text-sm font-medium text-gray-700">Violation
+                                Type</label>
                             <select id="violationType" required
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
                                 <option value="Speeding">Speeding</option>
@@ -198,7 +256,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="violationAmount" class="block text-sm font-medium text-gray-700">Fine Amount (in ETH)</label>
+                            <label for="violationAmount" class="block text-sm font-medium text-gray-700">Fine Amount (in
+                                ETH)</label>
                             <input type="number" step="1" min="1" id="violationAmount" required value="1000"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
                         </div>
@@ -206,7 +265,8 @@
                         <div>
                             <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
                             <input type="text" id="location" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border" placeholder="Main St & 5th Ave">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
+                                placeholder="Main St & 5th Ave">
                         </div>
                         <button type="submit"
                             class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-200">
@@ -217,24 +277,41 @@
                 </div>
 
                 <!-- History Table (Right Column on Desktop - showing Officer's recent history) -->
-                <div class="lg:col-span-2 hidden lg:block bg-white p-6 rounded-xl shadow-lg">
+                <!-- FIX: Removed the 'hidden md:block' classes so this content is now visible on mobile, stacking correctly in the grid-cols-1 layout. -->
+                <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Recent Issues (By You)</h2>
-                    <p class="text-sm text-gray-500">View the complete ledger by clicking "The Ledger" on the left navigation.</p>
+                    <p class="text-sm text-gray-500">View the complete ledger by clicking "The Ledger" on the left
+                        navigation.</p>
                     <div id="recentHistoryTableContainer" class="overflow-x-auto mt-4">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Violator</th>
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (ETH)</th>
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>    
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        License</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Violator</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Amount (ETH)</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Location</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date</th>
+                                    <th
+                                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status</th>
                                 </tr>
                             </thead>
                             <tbody id="recentHistoryTableBody" class="bg-white divide-y divide-gray-200">
                                 <!-- FIX: Colspan changed to 6 to match the 6 header columns -->
-                                <tr><td colspan="6" class="text-center p-4 text-gray-500">Connect wallet to view history.</td></tr>
+                                <tr>
+                                    <td colspan="6" class="text-center p-4 text-gray-500">Connect wallet to view
+                                        history.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -243,23 +320,43 @@
 
             <!-- 3. The Ledger View (Existing History) -->
             <section id="ledger-view" class="content-section bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">DLPT Violation Ledger (All History)</h2>
+                <h2 class="text-xl md:text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">DLPT Violation Ledger
+                    (All History)</h2>
                 <div id="ledgerTableContainer">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Violator</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Officer</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (ETH)</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action / Status</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    License</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Violator</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Officer</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Amount (ETH)</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date</th>
+                                <th
+                                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Action / Status</th>
                             </tr>
                         </thead>
                         <tbody id="fullLedgerTableBody" class="bg-white divide-y divide-gray-200">
-                            <tr><td colspan="8" class="text-center p-4 text-gray-500">Connect wallet to view the full ledger.</td></tr>
+                            <tr>
+                                <td colspan="8" class="text-center p-4 text-gray-500">Connect wallet to view the full
+                                    ledger.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -334,14 +431,14 @@
 
             const activeView = views[viewName];
             if (activeView) {
-                activeView.style.display = 'grid'; // Use grid for specific layouts
-                
+                activeView.style.display = viewName === 'officer' ? 'grid' : 'block'; // Use grid for specific layouts
+
                 // Set active class on the sidebar link
                 const activeLink = document.querySelector(`.nav-link[data-view="${viewName}"]`);
                 if (activeLink) activeLink.classList.add('active');
 
                 // If navigating to a view that requires up-to-date data, reload history
-                if (viewName === 'ledger' || viewName === 'home') {
+                if (viewName === 'ledger' || viewName === 'home' || viewName === 'officer') {
                     loadHistory();
                 }
             }
@@ -354,6 +451,18 @@
                 changeView(e.currentTarget.getAttribute('data-view'));
             });
         });
+
+        // Initialize to home view
+        window.onload = () => {
+            // Check for saved wallet address on load
+            const savedWallet = sessionStorage.getItem("walletAddress");
+            if (savedWallet) {
+                // Attempt to reconnect if previously connected
+                updateUIForConnectedState(savedWallet);
+                loadHistory();
+            }
+            changeView('home'); // Ensure home view is shown initially
+        };
 
         // --- Utility ---
         function displayMessage(text, isError = false) {
@@ -378,7 +487,7 @@
         function formatAddress(address) {
             return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'N/A';
         }
-        
+
         /**
          * Converts a BigInt UNIX timestamp to a readable date string.
          * @param {bigint} timestamp - The UNIX timestamp as a BigInt (in seconds).
@@ -387,7 +496,7 @@
         function formatTimestamp(timestamp) {
             try {
                 // Convert BigInt seconds to JS timestamp in milliseconds
-                const date = new Date(Number(timestamp) * 1000); 
+                const date = new Date(Number(timestamp) * 1000);
                 return date.toLocaleString();
             } catch (e) {
                 console.error("Error formatting timestamp:", e);
@@ -428,6 +537,7 @@
 
         // --- Wallet UI ---
         function updateUIForConnectedState(address) {
+            officerWallet = address; // Set the global variable
             walletShort.textContent = formatAddress(address);
             profile.classList.remove("hidden");
             profile.classList.add("flex");
@@ -476,11 +586,18 @@
             }
 
             const violatorInput = document.getElementById("violatorAddress").value.trim();
-            if (!ethers.isAddress(violatorInput)) {
-                status.textContent = "Invalid Ethereum address for violator.";
-                displayMessage("Invalid Ethereum address.", true);
+            try {
+                if (!ethers.isAddress(violatorInput)) {
+                    status.textContent = "Invalid Ethereum address for violator.";
+                    displayMessage("Invalid Ethereum address.", true);
+                    return;
+                }
+            } catch (e) {
+                status.textContent = "Invalid Ethereum address format.";
+                displayMessage("Invalid Ethereum address format.", true);
                 return;
             }
+
 
             const amountBigInt = BigInt(document.getElementById("violationAmount").value);
             const violationData = {
@@ -547,133 +664,114 @@
                 const isConnected = !!officerWallet;
 
                 // 1. Filter for the current officer's violations
-                const officerViolations = isConnected 
-                    ? violations.filter(v => v.officer.toLowerCase() === officerWallet.toLowerCase()) 
+                const officerViolations = isConnected
+                    ? violations.filter(v => v.officer.toLowerCase() === officerWallet.toLowerCase())
                     : [];
-                
+
                 // 2. Render Full Ledger (All Violations)
                 renderTable(violations, fullLedgerTableBody, true, isConnected);
 
-                // 3. Render Officer's Recent History (for officer-view section)
+                // 3. Render Officer's Recent History
                 renderTable(officerViolations, recentHistoryTableBody, false, isConnected);
 
                 // 4. Update Home View Stats
                 const total = violations.length;
-                const paid = violations.filter(v => (typeof v.status === 'string' ? v.status : 'Pending').toLowerCase() === 'paid').length;
+                const paid = violations.filter(v => v.status === 'Paid').length;
                 const unpaid = total - paid;
-                
+
                 totalViolationsCount.textContent = total;
-                paidFinesCount.textContent = paid;
                 unpaidFinesCount.textContent = unpaid;
+                paidFinesCount.textContent = paid;
 
             } catch (err) {
-                console.error("Failed to load history:", err);
-                fullLedgerTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-4">Failed to load ledger data.</td></tr>`;
-                recentHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 p-4">Failed to load your history.</td></tr>`;
+                console.error("Error loading history:", err);
+                displayMessage("Failed to fetch blockchain data. Check console.", true);
+                fullLedgerTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-2">Failed to load ledger.</td></tr>`;
+                recentHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 p-2">Failed to load history.</td></tr>`;
             }
         }
 
-        // COMPLETED FUNCTION: Now correctly renders Date and Location columns
-        function renderTable(violations, tbodyElement, includeOfficerColumn, isConnected) {
-            if (!violations.length) {
-                // Set the correct colspan for fallback messages
-                const colspan = includeOfficerColumn ? 8 : 6;
-                tbodyElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center p-4 text-gray-500">No violations found.</td></tr>`;
+        /**
+         * Renders the violation data into the specified table body.
+         * @param {Array<Object>} data - Array of violation objects from the contract.
+         * @param {HTMLElement} tableBody - The tbody element to populate.
+         * @param {boolean} isFullLedger - True for the main ledger (needs all columns + action button).
+         * @param {boolean} isConnected - True if the user's wallet is connected.
+         */
+        function renderTable(data, tableBody, isFullLedger, isConnected) {
+            tableBody.innerHTML = ''; // Clear previous entries
+
+            if (data.length === 0) {
+                const message = isConnected ? "No violations found." : "Connect wallet to view data.";
+                // Adjust colspan based on table type (8 for ledger, 6 for recent history)
+                const colspan = isFullLedger ? 8 : 6;
+                tableBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center p-4 text-gray-500">${message}</td></tr>`;
                 return;
             }
 
-            let html = '';
-            violations.forEach(v => {
-                // Determine status colors and text
-                const statusText = (typeof v.status === 'string' ? v.status : 'Pending');
-                let statusClasses = statusText.toLowerCase() === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            data.forEach(violation => {
+                const statusColor = violation.status === 'Paid' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100';
+                const statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">${violation.status}</span>`;
+                const amount = ethers.formatUnits(violation.amount, 0); // Display as BigInt number (in ETH equivalent units from contract)
 
-                // Format the timestamp (Date)
-                const formattedDate = formatTimestamp(v.timestamp);
-                
-                html += `
-                    <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="px-2 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${v.license}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500" title="${v.violator}">${formatAddress(v.violator)}</td>
+                let actionCell = '';
+                if (isFullLedger) {
+                    if (violation.status !== 'Paid') {
+                        actionCell = `
+                            <button onclick="markAsPaid('${violation.violationId}')"
+                                class="bg-indigo-500 text-white text-xs font-medium py-1 px-3 rounded-full hover:bg-indigo-600 transition duration-150">
+                                Mark Paid
+                            </button>
+                         `;
+                    } else {
+                        actionCell = statusBadge;
+                    }
+                } else {
+                    actionCell = statusBadge; // Officer's own history only shows status
+                }
+
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50', 'transition', 'duration-150');
+
+                let cells = `
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-800 font-medium">${violation.license}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-xs text-gray-500 font-mono">${formatAddress(violation.violator)}</td>
                 `;
 
-                if (includeOfficerColumn) {
-                    // Full Ledger view (8 columns)
-                    html += `
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500" title="${v.officer}">${formatAddress(v.officer)}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.violationType}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-900">${ethers.formatEther(v.amount)}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.location}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm">
-                            <span class="inline-flex items-center px-3 py-0.5 rounded-full font-semibold ${statusClasses}">
-                                ${statusText}
-                            </span>
-                            ${statusText.toLowerCase() !== 'paid' && isConnected && officerWallet.toLowerCase() === v.officer.toLowerCase()
-                                ? `<button onclick="markAsPaid('${v.violationId}')" class="ml-2 text-indigo-600 hover:text-indigo-900 text-xs font-bold">Mark Paid</button>`
-                                : ''
-                            }
-                        </td>
-                    `;
-                } else {
-                    // Officer Recent History view (6 columns: License, Violator, Amount, Date, Location, Status)
-                    html += `
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-900">${ethers.formatEther(v.amount)}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.location}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
-                        <td class="px-2 py-3 whitespace-nowrap text-sm">
-                            <span class="inline-flex items-center px-3 py-0.5 rounded-full font-semibold ${statusClasses}">
-                                ${statusText}
-                            </span>
-                        </td>
+                if (isFullLedger) {
+                    cells += `
+                        <td class="px-2 py-3 whitespace-nowrap text-xs text-gray-500 font-mono">${formatAddress(violation.officer)}</td>
                     `;
                 }
 
-                html += `</tr>`;
+                cells += `
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-800">${violation.violationType}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-red-700 font-semibold">${amount}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-700">${violation.location}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-xs text-gray-500">${formatTimestamp(violation.timestamp)}</td>
+                    <td class="px-2 py-3 whitespace-nowrap text-sm">
+                        ${actionCell}
+                    </td>
+                `;
+
+                row.innerHTML = cells;
+                tableBody.appendChild(row);
             });
-
-            tbodyElement.innerHTML = html;
         }
 
-        // --- Initialization ---
-        function initializeApp() {
-            // Check for saved wallet address and attempt to reconnect
-            const savedAddress = sessionStorage.getItem("walletAddress");
-            if (savedAddress) {
-                // Update the UI based on the previously connected address
-                officerWallet = savedAddress;
-                updateUIForConnectedState(savedAddress);
-                displayMessage("Click 'Connect Wallet' to resume blockchain actions.");
-            } else {
-                updateUIForDisconnectedState();
-            }
-
-            // Load initial history with read-only contract
-            loadHistory();
-            
-            // Set initial view
-            changeView('home');
-        }
-
-        // Initialize the app when the script runs
-        initializeApp();
-
-        // Handle account changes / chain changes
+        // --- Event Listener for Wallet Changes ---
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    // Disconnected
-                    disconnectWalletBtn.click();
-                } else if (officerWallet !== accounts[0]) {
-                    // Account changed - force a full re-initialization
-                    sessionStorage.setItem("walletAddress", accounts[0]);
-                    window.location.reload(); 
+                if (accounts.length > 0) {
+                    updateUIForConnectedState(accounts[0]);
+                    loadHistory();
+                    displayMessage("Wallet account changed.");
+                } else {
+                    // MetaMask disconnects accounts when user actively disconnects
+                    updateUIForDisconnectedState();
+                    loadHistory();
+                    displayMessage("Wallet disconnected externally.");
                 }
-            });
-
-            window.ethereum.on('chainChanged', (chainId) => {
-                // Simple reload to reconnect to the new chain/network if needed
-                window.location.reload();
             });
         }
     </script>
