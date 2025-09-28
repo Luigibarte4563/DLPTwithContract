@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLPT Officer Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+
+        /* Style for the history table to be responsive */
+        #historyTableContainer {
+            overflow-x: auto;
+        }
+    </style>
+    <!-- FIX: Explicitly load Ethers v6, which supports BrowserProvider and BigInt -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- Global Message Box (Replacing alert/confirm) -->
+    <div id="messageBox"
+        class="fixed top-4 right-4 p-3 rounded-lg shadow-xl hidden transition duration-300 z-50 min-w-[250px] text-sm"
+        role="alert"></div>
+
+    <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-md mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">DLPT Officer Portal</h1>
+        <div class="flex items-center space-x-4">
+            <button id="notificationsBtn"
+                class="hidden p-2 rounded-full bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </button>
+            <div id="profile" class="hidden flex items-center bg-indigo-50 p-2 rounded-full shadow-inner">
+                <span id="officerRole" class="hidden text-sm font-medium text-indigo-700 mr-3">Traffic Officer</span>
+                <span id="walletShort"
+                    class="text-indigo-900 font-mono text-xs bg-indigo-200 py-1 px-3 rounded-full"></span>
+                <button id="disconnectWalletBtn"
+                    class="ml-3 p-1 rounded-full text-indigo-600 hover:bg-indigo-300 transition"
+                    title="Disconnect Wallet">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+            <button id="connectWalletBtn"
+                class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg hover:bg-indigo-700 transition duration-200">
+                Connect Wallet
+            </button>
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Violation Form -->
+        <section class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Issue New Violation</h2>
+            <form id="violationForm" class="space-y-4">
+                <div>
+                    <label for="violatorAddress" class="block text-sm font-medium text-gray-700">Violator Wallet
+                        Address</label>
+                    <input type="text" id="violatorAddress" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                </div>
+                <div>
+                    <label for="licenseNumber" class="block text-sm font-medium text-gray-700">License Plate
+                        Number</label>
+                    <input type="text" id="licenseNumber" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                </div>
+                <div>
+                    <label for="violationType" class="block text-sm font-medium text-gray-700">Violation Type</label>
+                    <select id="violationType" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                        <option value="Speeding">Speeding</option>
+                        <option value="Parking">Illegal Parking</option>
+                        <option value="Light">Running Red Light</option>
+                        <option value="DUI">DUI</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="violationAmount" class="block text-sm font-medium text-gray-700">Fine Amount (in
+                        ETH)</label>
+                    <input type="number" step="1" min="1" id="violationAmount" required value="1000"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                </div>
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                    <input type="text" id="location" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
+                </div>
+                <button type="submit"
+                    class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-200">
+                    Submit Violation
+                </button>
+                <p id="status" class="text-center text-sm mt-3 text-red-500 font-medium"></p>
+            </form>
+        </section>
+
+        <!-- History Table -->
+        <section class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Issued Violations History</h2>
+            <div id="historyTableContainer" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                License</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Violator</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Amount (ETH)</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Location</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTable" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="8" class="text-center p-4 text-gray-500">Connect wallet to view history.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Wallet Connection Loading Modal -->
+    <div id="wallet-connect-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-40">
+        <div class="bg-white p-6 rounded-lg shadow-2xl flex items-center space-x-3">
+            <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <p class="text-gray-700 font-medium">Connecting to your wallet...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+    <script type="module">
+        import { connectWallet } from "../DLPT_Contracts/officer.js"; // your module with connectWallet function
+
+        // ----------------- CONFIG -----------------
+        const RPC_URL = "https://sepolia.infura.io/v3/927cc9e253b042d9b11fe17422a44763"; // Sepolia RPC
+        const CONTRACT_ADDRESS = "0x12e17c73ff8219ccd3265a4b66d83221e9991093"; // Your deployed Sepolia contract
+        const ABI = [
+            "function issueViolation(string _violationId, address _violator, string _license, string _violationType, uint256 _amount, string _location, uint256 _timestamp)",
+            "function markAsPaid(string _violationId)",
+            "function getAllViolations() view returns (tuple(string violationId, address officer, address violator, string license, string violationType, uint256 amount, string location, uint256 timestamp, string status)[])",
+        ];
+        // -----------------------------------------
+
+        // --- UI Elements ---
+        const connectWalletBtn = document.getElementById("connectWalletBtn");
+        const disconnectWalletBtn = document.getElementById("disconnectWalletBtn");
+        const walletConnectModal = document.getElementById("wallet-connect-modal");
+        const profile = document.getElementById("profile");
+        const walletShort = document.getElementById("walletShort");
+        const notificationsBtn = document.getElementById("notificationsBtn");
+        const officerRole = document.getElementById("officerRole");
+        const historyTable = document.getElementById("historyTable");
+        const violationForm = document.getElementById("violationForm");
+        const status = document.getElementById("status");
+        let officerWallet = null;
+
+        let provider, signer, contract;
+        let readProvider = new ethers.JsonRpcProvider(RPC_URL);
+        let readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, readProvider);
+
+        // --- Utility ---
+        function displayMessage(text, isError = false) {
+            const messageBox = document.getElementById("messageBox");
+            messageBox.textContent = text;
+            messageBox.classList.remove("hidden");
+            messageBox.classList.toggle("bg-red-100", isError);
+            messageBox.classList.toggle("text-red-800", isError);
+            messageBox.classList.toggle("bg-green-100", !isError);
+            messageBox.classList.toggle("text-green-800", !isError);
+            messageBox.classList.toggle("border-red-400", isError);
+            messageBox.classList.toggle("border-green-400", !isError);
+            messageBox.classList.add("border");
+
+            setTimeout(() => {
+                messageBox.classList.add("hidden");
+                messageBox.textContent = '';
+            }, 5000);
+        }
+
+        // --- Connect Wallet ---
+        async function connectContract() {
+            if (!window.ethereum) {
+                displayMessage("Please install MetaMask!", true);
+                return;
+            }
+
+            provider = new ethers.BrowserProvider(window.ethereum);
+
+            try {
+                const accounts = await provider.send("eth_requestAccounts", []);
+                if (!accounts || accounts.length === 0) {
+                    displayMessage("No wallet accounts found!", true);
+                    return;
+                }
+
+                officerWallet = accounts[0];
+                sessionStorage.setItem("walletAddress", officerWallet);
+
+                signer = await provider.getSigner();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+                updateUIForConnectedState(officerWallet);
+                displayMessage("Wallet connected!");
+                await loadHistory();
+            } catch (err) {
+                console.error(err);
+                displayMessage(err.code === 4001 ? "Connection rejected by user." : "Wallet connection failed.", true);
+            }
+        }
+
+        // --- Wallet UI ---
+        function updateUIForConnectedState(address) {
+            walletShort.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+            profile.classList.remove("hidden");
+            notificationsBtn.classList.remove("hidden");
+            officerRole.classList.remove("hidden");
+            connectWalletBtn.classList.add("hidden");
+            disconnectWalletBtn.classList.remove("hidden");
+        }
+
+        function updateUIForDisconnectedState() {
+            profile.classList.add("hidden");
+            notificationsBtn.classList.add("hidden");
+            officerRole.classList.add("hidden");
+            connectWalletBtn.classList.remove("hidden");
+            disconnectWalletBtn.classList.add("hidden");
+        }
+
+        // --- Buttons ---
+        connectWalletBtn.onclick = async () => {
+            walletConnectModal.classList.remove("hidden");
+            try {
+                await connectContract();
+            } finally {
+                walletConnectModal.classList.add("hidden");
+            }
+        };
+
+        disconnectWalletBtn.onclick = () => {
+            sessionStorage.removeItem("walletAddress");
+            officerWallet = null;
+            contract = null;
+            signer = null;
+            updateUIForDisconnectedState();
+            loadHistory();
+            displayMessage("Wallet disconnected.");
+        };
+
+        // --- Page Load & Account Changes ---
+        window.addEventListener("DOMContentLoaded", async () => {
+            const savedAddress = sessionStorage.getItem("walletAddress");
+            if (savedAddress) {
+                officerWallet = savedAddress;
+                updateUIForConnectedState(officerWallet);
+                try {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                } catch {
+                    updateUIForDisconnectedState();
+                    sessionStorage.removeItem("walletAddress");
+                    officerWallet = null;
+                }
+            } else updateUIForDisconnectedState();
+
+            if (window.ethereum) {
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    accounts.length ? window.location.reload() : disconnectWalletBtn.click();
+                });
+                window.ethereum.on('chainChanged', () => window.location.reload());
+            }
+
+            await loadHistory();
+        });
+
+        // --- Issue Violation ---
+        violationForm.onsubmit = async (e) => {
+            e.preventDefault();
+            if (!officerWallet || !contract) {
+                status.textContent = "Connect wallet first!";
+                return;
+            }
+
+            const violatorInput = document.getElementById("violatorAddress").value.trim();
+            if (!ethers.isAddress(violatorInput)) {
+                status.textContent = "Invalid Ethereum address for violator.";
+                return;
+            }
+
+            const amountBigInt = BigInt(document.getElementById("violationAmount").value);
+            const violationData = {
+                violationId: `V-${Date.now()}`,
+                violator: violatorInput,
+                license: document.getElementById("licenseNumber").value.trim(),
+                type: document.getElementById("violationType").value,
+                amount: amountBigInt,
+                location: document.getElementById("location").value.trim(),
+                timestamp: BigInt(Math.floor(Date.now() / 1000))
+            };
+
+            try {
+                status.textContent = "Confirming transaction...";
+                const tx = await contract.issueViolation(
+                    violationData.violationId,
+                    violationData.violator,
+                    violationData.license,
+                    violationData.type,
+                    violationData.amount,
+                    violationData.location,
+                    violationData.timestamp
+                );
+                status.textContent = `Tx sent: ${tx.hash.slice(0, 10)}..., waiting confirmation...`;
+                await tx.wait();
+                status.textContent = "Violation issued successfully!";
+                violationForm.reset();
+                await loadHistory();
+            } catch (err) {
+                console.error(err);
+                status.textContent = err.shortMessage || err.message || "Error issuing violation.";
+            }
+        };
+
+        // --- Mark as Paid ---
+        window.markAsPaid = async (violationId) => {
+            if (!contract) { displayMessage("Connect wallet first.", true); return; }
+            try {
+                displayMessage(`Confirming payment for ${violationId}...`);
+                const tx = await contract.markAsPaid(violationId);
+                await tx.wait();
+                displayMessage(`Violation ${violationId} marked as Paid successfully!`);
+                await loadHistory();
+            } catch (err) {
+                console.error(err);
+                displayMessage(err.shortMessage || err.message || "Error marking as paid.", true);
+            }
+        };
+
+        // --- Load History ---
+        async function loadHistory() {
+            if (!readContract) {
+                historyTable.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-2">Contract not initialized.</td></tr>`;
+                return;
+            }
+
+            try {
+                const violations = await readContract.getAllViolations();
+                const isConnected = !!officerWallet;
+
+                const filtered = isConnected ? violations.filter(v => v.officer.toLowerCase() === officerWallet.toLowerCase()) : violations;
+
+                if (!filtered.length) {
+                    historyTable.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-500">${isConnected ? "No violations by you yet." : "No violations found."}</td></tr>`;
+                    return;
+                }
+
+                historyTable.innerHTML = filtered.map(v => {
+                    const statusText = typeof v.status === 'string' ? v.status : 'Pending';
+                    const isPaid = statusText.toLowerCase() === 'paid';
+                    const amountDisplay = v.amount.toString();
+                    const timestampMs = Number(v.timestamp) * 1000;
+
+                    const buttonHtml = isConnected && !isPaid
+                        ? `<button onclick="markAsPaid('${v.violationId}')" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-xs shadow-md">Mark Paid</button>`
+                        : `<span class="${isPaid ? 'text-green-600 font-semibold' : 'text-gray-500 font-semibold'}">${statusText}</span>`;
+
+                    return `
+                <tr id="row-${v.violationId}" class="${isPaid ? 'bg-green-50' : 'hover:bg-gray-50'} border-b">
+                    <td class="p-3 text-sm text-gray-800">${v.license}</td>
+                    <td class="p-3 break-all text-xs text-gray-600 font-mono">${v.violator.slice(0, 8)}...${v.violator.slice(-4)}</td>
+                    <td class="p-3 text-sm text-gray-700">${v.violationType}</td>
+                    <td class="p-3 font-semibold text-indigo-600">${amountDisplay}</td>
+                    <td class="p-3 text-sm text-gray-600">${v.location}</td>
+                    <td class="p-3 text-xs text-gray-500">${new Date(timestampMs).toLocaleString()}</td>
+                    <td class="p-3 status-cell text-xs">${buttonHtml}</td>
+                    <td class="p-3">${!isPaid && isConnected ? buttonHtml : '<span class="text-gray-400">-</span>'}</td>
+                </tr>`;
+                }).join('');
+
+            } catch (err) {
+                console.error(err);
+                historyTable.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-4">Failed to load violations.</td></tr>`;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
+s
