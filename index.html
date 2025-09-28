@@ -14,7 +14,7 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
-                }
+                },
             }
         }
     </script>
@@ -156,17 +156,17 @@
                     </div>
 
                     <div class="mt-8 border-t pt-6">
-                         <h3 class="text-xl font-semibold text-gray-700 mb-3">Quick Actions</h3>
-                         <div class="flex flex-wrap gap-4">
-                             <button onclick="changeView('officer')" class="bg-indigo-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-indigo-600 transition duration-200 flex items-center space-x-2">
-                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                                 <span>Issue New Ticket</span>
-                             </button>
-                             <button onclick="changeView('ledger')" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 flex items-center space-x-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-                                 <span>View Full Ledger</span>
-                             </button>
-                         </div>
+                           <h3 class="text-xl font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                           <div class="flex flex-wrap gap-4">
+                               <button onclick="changeView('officer')" class="bg-indigo-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-indigo-600 transition duration-200 flex items-center space-x-2">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                   <span>Issue New Ticket</span>
+                               </button>
+                               <button onclick="changeView('ledger')" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow-md hover:bg-gray-300 transition duration-200 flex items-center space-x-2">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h6a1 1 0 100-2H7zm0 4a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+                                   <span>View Full Ledger</span>
+                               </button>
+                           </div>
                     </div>
                 </div>
             </section>
@@ -202,6 +202,7 @@
                             <input type="number" step="1" min="1" id="violationAmount" required value="1000"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border">
                         </div>
+                        <!-- ADDED: Location field (already present in the original HTML) -->
                         <div>
                             <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
                             <input type="text" id="location" required
@@ -215,7 +216,7 @@
                     </form>
                 </div>
 
-                <!-- History Table (Right Column on Desktop - only showing the form in this view) -->
+                <!-- History Table (Right Column on Desktop - showing Officer's recent history) -->
                 <div class="lg:col-span-2 hidden lg:block bg-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Recent Issues (By You)</h2>
                     <p class="text-sm text-gray-500">View the complete ledger by clicking "The Ledger" on the left navigation.</p>
@@ -226,11 +227,14 @@
                                     <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License</th>
                                     <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Violator</th>
                                     <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (ETH)</th>
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>    
+                                    <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                     <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="recentHistoryTableBody" class="bg-white divide-y divide-gray-200">
-                                <tr><td colspan="4" class="text-center p-4 text-gray-500">Connect wallet to view history.</td></tr>
+                                <!-- FIX: Colspan changed to 6 to match the 6 header columns -->
+                                <tr><td colspan="6" class="text-center p-4 text-gray-500">Connect wallet to view history.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -284,6 +288,7 @@
         const RPC_URL = "https://sepolia.infura.io/v3/927cc9e253b042d9b11fe17422a44763"; // Sepolia RPC
         const CONTRACT_ADDRESS = "0x12e17c73ff8219ccd3265a4b66d83221e9991093"; // Your deployed Sepolia contract
         const ABI = [
+            // Added _location and _timestamp to the issueViolation function signature
             "function issueViolation(string _violationId, address _violator, string _license, string _violationType, uint256 _amount, string _location, uint256 _timestamp)",
             "function markAsPaid(string _violationId)",
             "function getAllViolations() view returns (tuple(string violationId, address officer, address violator, string license, string violationType, uint256 amount, string location, uint256 timestamp, string status)[])",
@@ -334,6 +339,11 @@
                 // Set active class on the sidebar link
                 const activeLink = document.querySelector(`.nav-link[data-view="${viewName}"]`);
                 if (activeLink) activeLink.classList.add('active');
+
+                // If navigating to a view that requires up-to-date data, reload history
+                if (viewName === 'ledger' || viewName === 'home') {
+                    loadHistory();
+                }
             }
         };
 
@@ -367,6 +377,22 @@
 
         function formatAddress(address) {
             return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'N/A';
+        }
+        
+        /**
+         * Converts a BigInt UNIX timestamp to a readable date string.
+         * @param {bigint} timestamp - The UNIX timestamp as a BigInt (in seconds).
+         * @returns {string} Formatted date string (local time).
+         */
+        function formatTimestamp(timestamp) {
+            try {
+                // Convert BigInt seconds to JS timestamp in milliseconds
+                const date = new Date(Number(timestamp) * 1000); 
+                return date.toLocaleString();
+            } catch (e) {
+                console.error("Error formatting timestamp:", e);
+                return 'Invalid Date';
+            }
         }
 
         // --- Connect Wallet ---
@@ -464,7 +490,7 @@
                 type: document.getElementById("violationType").value,
                 amount: amountBigInt,
                 location: document.getElementById("location").value.trim(),
-                timestamp: BigInt(Math.floor(Date.now() / 1000))
+                timestamp: BigInt(Math.floor(Date.now() / 1000)) // Current Unix timestamp in seconds
             };
 
             try {
@@ -475,8 +501,8 @@
                     violationData.license,
                     violationData.type,
                     violationData.amount,
-                    violationData.location,
-                    violationData.timestamp
+                    violationData.location, // Passing location
+                    violationData.timestamp // Passing timestamp
                 );
                 status.textContent = `Tx sent: ${formatAddress(tx.hash)}, waiting confirmation...`;
                 await tx.wait();
@@ -511,11 +537,12 @@
         async function loadHistory() {
             if (!readContract) {
                 fullLedgerTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-2">Contract not initialized.</td></tr>`;
-                recentHistoryTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-red-600 p-2">Contract not initialized.</td></tr>`;
+                recentHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 p-2">Contract not initialized.</td></tr>`;
                 return;
             }
 
             try {
+                // Fetch all violations from the smart contract
                 const violations = await readContract.getAllViolations();
                 const isConnected = !!officerWallet;
 
@@ -542,88 +569,114 @@
             } catch (err) {
                 console.error("Failed to load history:", err);
                 fullLedgerTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-red-600 p-4">Failed to load ledger data.</td></tr>`;
-                recentHistoryTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-red-600 p-4">Failed to load your history.</td></tr>`;
+                recentHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 p-4">Failed to load your history.</td></tr>`;
             }
         }
 
+        // COMPLETED FUNCTION: Now correctly renders Date and Location columns
         function renderTable(violations, tbodyElement, includeOfficerColumn, isConnected) {
             if (!violations.length) {
-                const colspan = includeOfficerColumn ? 8 : 4;
+                // Set the correct colspan for fallback messages
+                const colspan = includeOfficerColumn ? 8 : 6;
                 tbodyElement.innerHTML = `<tr><td colspan="${colspan}" class="text-center p-4 text-gray-500">No violations found.</td></tr>`;
                 return;
             }
 
-            tbodyElement.innerHTML = violations.map(v => {
-                const statusText = typeof v.status === 'string' ? v.status : 'Pending';
-                const isPaid = statusText.toLowerCase() === 'paid';
-                const amountDisplay = v.amount.toString();
-                const timestampMs = Number(v.timestamp) * 1000;
+            let html = '';
+            violations.forEach(v => {
+                // Determine status colors and text
+                const statusText = (typeof v.status === 'string' ? v.status : 'Pending');
+                let statusClasses = statusText.toLowerCase() === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
 
-                let actionCellHtml = `<span class="${isPaid ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'}">${statusText}</span>`;
+                // Format the timestamp (Date)
+                const formattedDate = formatTimestamp(v.timestamp);
+                
+                html += `
+                    <tr class="hover:bg-gray-50 transition duration-150">
+                        <td class="px-2 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${v.license}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500" title="${v.violator}">${formatAddress(v.violator)}</td>
+                `;
 
-                // Only show the "Mark Paid" button if connected and it's not already paid
-                if (isConnected && !isPaid) {
-                    actionCellHtml = `<button onclick="markAsPaid('${v.violationId}')" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-xs shadow-md">Mark Paid</button>`;
+                if (includeOfficerColumn) {
+                    // Full Ledger view (8 columns)
+                    html += `
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500" title="${v.officer}">${formatAddress(v.officer)}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.violationType}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-900">${ethers.formatEther(v.amount)}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.location}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm">
+                            <span class="inline-flex items-center px-3 py-0.5 rounded-full font-semibold ${statusClasses}">
+                                ${statusText}
+                            </span>
+                            ${statusText.toLowerCase() !== 'paid' && isConnected && officerWallet.toLowerCase() === v.officer.toLowerCase()
+                                ? `<button onclick="markAsPaid('${v.violationId}')" class="ml-2 text-indigo-600 hover:text-indigo-900 text-xs font-bold">Mark Paid</button>`
+                                : ''
+                            }
+                        </td>
+                    `;
+                } else {
+                    // Officer Recent History view (6 columns: License, Violator, Amount, Date, Location, Status)
+                    html += `
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-900">${ethers.formatEther(v.amount)}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${v.location}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                        <td class="px-2 py-3 whitespace-nowrap text-sm">
+                            <span class="inline-flex items-center px-3 py-0.5 rounded-full font-semibold ${statusClasses}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    `;
                 }
 
-                const officerCell = includeOfficerColumn 
-                    ? `<td class="p-3 break-all text-xs text-gray-600 font-mono">${formatAddress(v.officer)}</td>` 
-                    : '';
-                
-                const typeCell = includeOfficerColumn ? `<td class="p-3 text-sm text-gray-700">${v.violationType}</td>` : '';
-                const locationCell = includeOfficerColumn ? `<td class="p-3 text-sm text-gray-600">${v.location}</td>` : '';
-                const dateCell = includeOfficerColumn ? `<td class="p-3 text-xs text-gray-500">${new Date(timestampMs).toLocaleString()}</td>` : '';
-                
-                return `
-                    <tr id="row-${v.violationId}" class="${isPaid ? 'bg-green-50' : 'hover:bg-gray-50'} border-b">
-                        <td class="p-3 text-sm text-gray-800">${v.license}</td>
-                        <td class="p-3 break-all text-xs text-gray-600 font-mono">${formatAddress(v.violator)}</td>
-                        ${officerCell}
-                        ${typeCell}
-                        <td class="p-3 font-semibold text-indigo-600">${amountDisplay}</td>
-                        ${locationCell}
-                        ${dateCell}
-                        <td class="p-3 status-cell text-xs whitespace-nowrap">${actionCellHtml}</td>
-                    </tr>`;
-            }).join('');
+                html += `</tr>`;
+            });
+
+            tbodyElement.innerHTML = html;
         }
 
-        // --- Page Load & Account Changes ---
-        window.addEventListener("DOMContentLoaded", async () => {
-            // Initial View
-            changeView('home');
-
+        // --- Initialization ---
+        function initializeApp() {
+            // Check for saved wallet address and attempt to reconnect
             const savedAddress = sessionStorage.getItem("walletAddress");
             if (savedAddress) {
+                // Update the UI based on the previously connected address
                 officerWallet = savedAddress;
-                updateUIForConnectedState(officerWallet);
-                try {
-                    // Re-initialize for signing/writing transactions
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-                } catch {
-                    // If re-connection fails (e.g., MetaMask locked), treat as disconnected
-                    updateUIForDisconnectedState();
-                    sessionStorage.removeItem("walletAddress");
-                }
+                updateUIForConnectedState(savedAddress);
+                displayMessage("Click 'Connect Wallet' to resume blockchain actions.");
             } else {
                 updateUIForDisconnectedState();
             }
 
-            if (window.ethereum) {
-                window.ethereum.on('accountsChanged', (accounts) => {
-                    // Reload on account change for state refresh
-                    accounts.length ? window.location.reload() : disconnectWalletBtn.click();
-                });
-                window.ethereum.on('chainChanged', () => window.location.reload());
-            }
+            // Load initial history with read-only contract
+            loadHistory();
+            
+            // Set initial view
+            changeView('home');
+        }
 
-            // Load read-only data regardless of connection status
-            await loadHistory();
-        });
+        // Initialize the app when the script runs
+        initializeApp();
+
+        // Handle account changes / chain changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    // Disconnected
+                    disconnectWalletBtn.click();
+                } else if (officerWallet !== accounts[0]) {
+                    // Account changed - force a full re-initialization
+                    sessionStorage.setItem("walletAddress", accounts[0]);
+                    window.location.reload(); 
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                // Simple reload to reconnect to the new chain/network if needed
+                window.location.reload();
+            });
+        }
     </script>
-
 </body>
 
 </html>
